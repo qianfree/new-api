@@ -79,11 +79,25 @@ func SubscriptionRequestCreemPay(c *gin.Context) {
 	reference := "sub-creem-ref-" + randstr.String(6)
 	referenceId := "sub_ref_" + common.Sha1([]byte(reference+time.Now().String()+user.Username))
 
+	// Reuse Creem checkout generator by building a lightweight product reference.
+	currency := "USD"
+	payMoney := plan.PriceAmount
+	switch operation_setting.GetGeneralSetting().QuotaDisplayType {
+	case operation_setting.QuotaDisplayTypeCNY:
+		currency = "CNY"
+		// Convert USD price to CNY for payment
+		payMoney = plan.PriceAmount * operation_setting.USDExchangeRate
+	case operation_setting.QuotaDisplayTypeUSD:
+		currency = "USD"
+	default:
+		currency = "USD"
+	}
+
 	// create pending order first
 	order := &model.SubscriptionOrder{
 		UserId:        userId,
 		PlanId:        plan.Id,
-		Money:         plan.PriceAmount,
+		Money:         payMoney,
 		TradeNo:       referenceId,
 		PaymentMethod: PaymentMethodCreem,
 		CreateTime:    time.Now().Unix(),
@@ -94,20 +108,10 @@ func SubscriptionRequestCreemPay(c *gin.Context) {
 		return
 	}
 
-	// Reuse Creem checkout generator by building a lightweight product reference.
-	currency := "USD"
-	switch operation_setting.GetGeneralSetting().QuotaDisplayType {
-	case operation_setting.QuotaDisplayTypeCNY:
-		currency = "CNY"
-	case operation_setting.QuotaDisplayTypeUSD:
-		currency = "USD"
-	default:
-		currency = "USD"
-	}
 	product := &CreemProduct{
 		ProductId: plan.CreemProductId,
 		Name:      plan.Title,
-		Price:     plan.PriceAmount,
+		Price:     payMoney,
 		Currency:  currency,
 		Quota:     0,
 	}

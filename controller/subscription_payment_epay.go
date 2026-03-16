@@ -81,10 +81,13 @@ func SubscriptionRequestEpay(c *gin.Context) {
 		return
 	}
 
+	// ePay is a CNY payment gateway, convert USD price to CNY
+	payMoney := plan.PriceAmount * operation_setting.USDExchangeRate
+
 	order := &model.SubscriptionOrder{
 		UserId:        userId,
 		PlanId:        plan.Id,
-		Money:         plan.PriceAmount,
+		Money:         payMoney,
 		TradeNo:       tradeNo,
 		PaymentMethod: req.PaymentMethod,
 		CreateTime:    time.Now().Unix(),
@@ -98,7 +101,7 @@ func SubscriptionRequestEpay(c *gin.Context) {
 		Type:           req.PaymentMethod,
 		ServiceTradeNo: tradeNo,
 		Name:           fmt.Sprintf("SUB:%s", plan.Title),
-		Money:          strconv.FormatFloat(plan.PriceAmount, 'f', 2, 64),
+		Money:          strconv.FormatFloat(payMoney, 'f', 2, 64),
 		Device:         epay.PC,
 		NotifyUrl:      notifyUrl,
 		ReturnUrl:      returnUrl,
