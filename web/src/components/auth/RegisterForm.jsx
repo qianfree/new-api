@@ -78,6 +78,7 @@ const RegisterForm = () => {
     password: '',
     password2: '',
     email: '',
+    phone: '',
     verification_code: '',
     wechat_verification_code: '',
   });
@@ -142,9 +143,14 @@ const RegisterForm = () => {
   );
 
   const [showEmailVerification, setShowEmailVerification] = useState(false);
+  const [showSMSVerification, setShowSMSVerification] = useState(false);
+  const [smsCodeLoading, setSmsCodeLoading] = useState(false);
+  const [smsDisableButton, setSmsDisableButton] = useState(false);
+  const [smsCountdown, setSmsCountdown] = useState(60);
 
   useEffect(() => {
     setShowEmailVerification(!!status?.email_verification);
+    setShowSMSVerification(!!status?.sms_verification);
     if (status?.turnstile_check) {
       setTurnstileEnabled(true);
       setTurnstileSiteKey(status.turnstile_site_key);
@@ -167,6 +173,19 @@ const RegisterForm = () => {
     }
     return () => clearInterval(countdownInterval); // Clean up on unmount
   }, [disableButton, countdown]);
+
+  useEffect(() => {
+    let smsInterval = null;
+    if (smsDisableButton && smsCountdown > 0) {
+      smsInterval = setInterval(() => {
+        setSmsCountdown(smsCountdown - 1);
+      }, 1000);
+    } else if (smsCountdown === 0) {
+      setSmsDisableButton(false);
+      setSmsCountdown(60);
+    }
+    return () => clearInterval(smsInterval);
+  }, [smsDisableButton, smsCountdown]);
 
   useEffect(() => {
     return () => {
@@ -276,6 +295,31 @@ const RegisterForm = () => {
       showError('发送验证码失败，请重试');
     } finally {
       setVerificationCodeLoading(false);
+    }
+  };
+
+  const sendSMSVerificationCode = async () => {
+    if (inputs.phone === '') return;
+    if (turnstileEnabled && turnstileToken === '') {
+      showInfo('请稍后几秒重试，Turnstile 正在检查用户环境！');
+      return;
+    }
+    setSmsCodeLoading(true);
+    try {
+      const res = await API.get(
+        `/api/sms_verification?phone=${encodeURIComponent(inputs.phone)}&turnstile=${turnstileToken}`,
+      );
+      const { success, message } = res.data;
+      if (success) {
+        showSuccess(t('短信验证码发送成功！'));
+        setSmsDisableButton(true);
+      } else {
+        showError(message);
+      }
+    } catch (error) {
+      showError(t('发送验证码失败，请重试'));
+    } finally {
+      setSmsCodeLoading(false);
     }
   };
 
@@ -628,6 +672,40 @@ const RegisterForm = () => {
                       field='verification_code'
                       label={t('验证码')}
                       placeholder={t('输入验证码')}
+                      name='verification_code'
+                      onChange={(value) =>
+                        handleChange('verification_code', value)
+                      }
+                      prefix={<IconKey />}
+                    />
+                  </>
+                )}
+
+                {showSMSVerification && (
+                  <>
+                    <Form.Input
+                      field='phone'
+                      label={t('手机号')}
+                      placeholder={t('输入手机号')}
+                      name='phone'
+                      onChange={(value) => handleChange('phone', value)}
+                      prefix={<IconMail />}
+                      suffix={
+                        <Button
+                          onClick={sendSMSVerificationCode}
+                          loading={smsCodeLoading}
+                          disabled={smsDisableButton || smsCodeLoading}
+                        >
+                          {smsDisableButton
+                            ? `${t('重新发送')} (${smsCountdown})`
+                            : t('获取短信验证码')}
+                        </Button>
+                      }
+                    />
+                    <Form.Input
+                      field='verification_code'
+                      label={t('短信验证码')}
+                      placeholder={t('输入短信验证码')}
                       name='verification_code'
                       onChange={(value) =>
                         handleChange('verification_code', value)

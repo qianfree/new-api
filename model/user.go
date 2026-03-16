@@ -29,6 +29,7 @@ type User struct {
 	Role             int            `json:"role" gorm:"type:int;default:1"`   // admin, common
 	Status           int            `json:"status" gorm:"type:int;default:1"` // enabled, disabled
 	Email            string         `json:"email" gorm:"index" validate:"max=50"`
+	Phone            string         `json:"phone" gorm:"index" validate:"max=20"`
 	GitHubId         string         `json:"github_id" gorm:"column:github_id;index"`
 	DiscordId        string         `json:"discord_id" gorm:"column:discord_id;index"`
 	OidcId           string         `json:"oidc_id" gorm:"column:oidc_id;index"`
@@ -159,26 +160,26 @@ func generateDefaultSidebarConfigForRole(userRole int) string {
 }
 
 // CheckUserExistOrDeleted check if user exist or deleted, if not exist, return false, nil, if deleted or exist, return true, nil
-func CheckUserExistOrDeleted(username string, email string) (bool, error) {
+func CheckUserExistOrDeleted(username string, email string, phone string) (bool, error) {
 	var user User
 
-	// err := DB.Unscoped().First(&user, "username = ? or email = ?", username, email).Error
-	// check email if empty
 	var err error
-	if email == "" {
-		err = DB.Unscoped().First(&user, "username = ?", username).Error
+	query := DB.Unscoped()
+	if email != "" && phone != "" {
+		err = query.First(&user, "username = ? or email = ? or phone = ?", username, email, phone).Error
+	} else if email != "" {
+		err = query.First(&user, "username = ? or email = ?", username, email).Error
+	} else if phone != "" {
+		err = query.First(&user, "username = ? or phone = ?", username, phone).Error
 	} else {
-		err = DB.Unscoped().First(&user, "username = ? or email = ?", username, email).Error
+		err = query.First(&user, "username = ?", username).Error
 	}
 	if err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
-			// not exist, return false, nil
 			return false, nil
 		}
-		// other error, return false, err
 		return false, err
 	}
-	// exist, return true, nil
 	return true, nil
 }
 
@@ -678,6 +679,10 @@ func (user *User) FillUserByTelegramId() error {
 
 func IsEmailAlreadyTaken(email string) bool {
 	return DB.Unscoped().Where("email = ?", email).Find(&User{}).RowsAffected == 1
+}
+
+func IsPhoneAlreadyTaken(phone string) bool {
+	return DB.Unscoped().Where("phone = ?", phone).Find(&User{}).RowsAffected == 1
 }
 
 func IsWeChatIdAlreadyTaken(wechatId string) bool {

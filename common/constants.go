@@ -44,6 +44,7 @@ var MaxRecentItems = 1000
 var PasswordLoginEnabled = true
 var PasswordRegisterEnabled = true
 var EmailVerificationEnabled = false
+var SMSVerificationEnabled = false
 var GitHubOAuthEnabled = false
 var LinuxDOOAuthEnabled = false
 var WeChatAuthEnabled = false
@@ -96,6 +97,12 @@ var WeChatAccountQRCodeImageURL = ""
 
 var TurnstileSiteKey = ""
 var TurnstileSecretKey = ""
+
+var SMSProvider = ""
+var SMSAccessKeyId = ""
+var SMSAccessKeySecret = ""
+var SMSSignName = ""
+var SMSTemplateCode = ""
 
 var TelegramBotToken = ""
 var TelegramBotName = ""

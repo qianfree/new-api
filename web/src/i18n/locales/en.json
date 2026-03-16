@@ -2992,6 +2992,7 @@
     "通知配置": "Notification configuration",
     "通过划转功能将奖励额度转入到您的账户余额中": "Transfer the reward amount to your account balance through the transfer function",
     "通过密码注册时需要进行邮箱验证": "Email verification is required when registering via password",
+    "通过密码注册时需要进行短信验证": "SMS verification is required when registering via password",
     "通道 ${name} 余额更新成功！": "Channel ${name} quota updated successfully!",
     "通道 ${name} 测试成功，模型 ${model} 耗时 ${time.toFixed(2)} 秒。": "Channel ${name} test successful, model ${model} took ${time.toFixed(2)} seconds.",
     "通道 ${name} 测试成功，耗时 ${time.toFixed(2)} 秒。": "Channel ${name} test successful, took ${time.toFixed(2)} seconds.",
@@ -3309,6 +3310,17 @@
     "输入价格：{{symbol}}{{price}} / 1M tokens": "Input Price: {{symbol}}{{price}} / 1M tokens",
     "输出价格 {{symbol}}{{price}} / 1M tokens": "Output Price {{symbol}}{{price}} / 1M tokens",
     "输出价格：{{symbol}}{{price}} / 1M tokens": "Output Price: {{symbol}}{{price}} / 1M tokens",
-    "输出价格：{{symbol}}{{total}} / 1M tokens": "Output Price: {{symbol}}{{total}} / 1M tokens"
+    "输出价格：{{symbol}}{{total}} / 1M tokens": "Output Price: {{symbol}}{{total}} / 1M tokens",
+    "手机号": "Phone Number",
+    "输入手机号": "Enter phone number",
+    "获取短信验证码": "Get SMS Code",
+    "短信验证码": "SMS Code",
+    "输入短信验证码": "Enter SMS code",
+    "短信验证码发送成功！": "SMS verification code sent successfully!",
+    "配置 SMS 短信服务": "Configure SMS Service",
+    "用以支持短信验证码发送": "To support sending SMS verification codes",
+    "短信签名": "SMS Sign Name",
+    "短信模板 Code": "SMS Template Code",
+    "保存 SMS 设置": "Save SMS Settings"
   }
 }

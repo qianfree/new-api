@@ -72,6 +72,7 @@ const (
 	MsgUserSessionSaveFailed         = "user.session_save_failed"
 	MsgUserRequire2FA                = "user.require_2fa"
 	MsgUserEmailVerificationRequired = "user.email_verification_required"
+	MsgUserSMSVerificationRequired   = "user.sms_verification_required"
 	MsgUserVerificationCodeError     = "user.verification_code_error"
 	MsgUserInputInvalid              = "user.input_invalid"
 	MsgUserNoPermissionSameLevel     = "user.no_permission_same_level"

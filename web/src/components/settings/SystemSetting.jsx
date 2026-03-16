@@ -50,6 +50,12 @@ const SystemSetting = () => {
     PasswordLoginEnabled: '',
     PasswordRegisterEnabled: '',
     EmailVerificationEnabled: '',
+    SMSVerificationEnabled: '',
+    SMSProvider: '',
+    SMSAccessKeyId: '',
+    SMSAccessKeySecret: '',
+    SMSSignName: '',
+    SMSTemplateCode: '',
     GitHubOAuthEnabled: '',
     GitHubClientId: '',
     GitHubClientSecret: '',
@@ -174,6 +180,7 @@ const SystemSetting = () => {
           case 'PasswordLoginEnabled':
           case 'PasswordRegisterEnabled':
           case 'EmailVerificationEnabled':
+          case 'SMSVerificationEnabled':
           case 'GitHubOAuthEnabled':
           case 'WeChatAuthEnabled':
           case 'TelegramOAuthEnabled':
@@ -607,6 +614,25 @@ const SystemSetting = () => {
     }
   };
 
+  const submitSMS = async () => {
+    const options = [];
+    const smsKeys = [
+      'SMSProvider',
+      'SMSAccessKeyId',
+      'SMSAccessKeySecret',
+      'SMSSignName',
+      'SMSTemplateCode',
+    ];
+    for (const key of smsKeys) {
+      if (originInputs[key] !== inputs[key] && inputs[key] !== '') {
+        options.push({ key, value: inputs[key] });
+      }
+    }
+    if (options.length > 0) {
+      await updateOptions(options);
+    }
+  };
+
   const submitLinuxDOOAuth = async () => {
     const options = [];
 
@@ -1014,6 +1040,15 @@ const SystemSetting = () => {
                         }
                       >
                         {t('通过密码注册时需要进行邮箱验证')}
+                      </Form.Checkbox>
+                      <Form.Checkbox
+                        field='SMSVerificationEnabled'
+                        noLabel
+                        onChange={(e) =>
+                          handleCheckboxChange('SMSVerificationEnabled', e)
+                        }
+                      >
+                        {t('通过密码注册时需要进行短信验证')}
                       </Form.Checkbox>
                       <Form.Checkbox
                         field='RegisterEnabled'
@@ -1620,6 +1655,63 @@ const SystemSetting = () => {
                   </Row>
                   <Button onClick={submitTurnstile}>
                     {t('保存 Turnstile 设置')}
+                  </Button>
+                </Form.Section>
+              </Card>
+
+              <Card>
+                <Form.Section text={t('配置 SMS 短信服务')}>
+                  <Text>{t('用以支持短信验证码发送')}</Text>
+                  <Row
+                    gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
+                  >
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='SMSProvider'
+                        label={t('SMS Provider')}
+                        placeholder={t('例如：aliyun、tencent、twilio')}
+                      />
+                    </Col>
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='SMSAccessKeyId'
+                        label={t('Access Key ID')}
+                        placeholder={t('敏感信息不会发送到前端显示')}
+                      />
+                    </Col>
+                  </Row>
+                  <Row
+                    gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
+                  >
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='SMSAccessKeySecret'
+                        label={t('Access Key Secret')}
+                        type='password'
+                        placeholder={t('敏感信息不会发送到前端显示')}
+                      />
+                    </Col>
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='SMSSignName'
+                        label={t('短信签名')}
+                        placeholder={t('短信签名')}
+                      />
+                    </Col>
+                  </Row>
+                  <Row
+                    gutter={{ xs: 8, sm: 16, md: 24, lg: 24, xl: 24, xxl: 24 }}
+                  >
+                    <Col xs={24} sm={24} md={12} lg={12} xl={12}>
+                      <Form.Input
+                        field='SMSTemplateCode'
+                        label={t('短信模板 Code')}
+                        placeholder={t('短信模板 Code')}
+                      />
+                    </Col>
+                  </Row>
+                  <Button onClick={submitSMS}>
+                    {t('保存 SMS 设置')}
                   </Button>
                 </Form.Section>
               </Card>

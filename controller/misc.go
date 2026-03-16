@@ -51,6 +51,7 @@ func GetStatus(c *gin.Context) {
 		"version":                     common.Version,
 		"start_time":                  common.StartTime,
 		"email_verification":          common.EmailVerificationEnabled,
+		"sms_verification":            common.SMSVerificationEnabled,
 		"github_oauth":                common.GitHubOAuthEnabled,
 		"github_client_id":            common.GitHubClientId,
 		"discord_oauth":               system_setting.GetDiscordSettings().Enabled,
@@ -288,6 +289,36 @@ func SendEmailVerification(c *gin.Context) {
 		"<p>您的验证码为: <strong>%s</strong></p>"+
 		"<p>验证码 %d 分钟内有效，如果不是本人操作，请忽略。</p>", common.SystemName, code, common.VerificationValidMinutes)
 	err := common.SendEmail(subject, email, content)
+	if err != nil {
+		common.ApiError(c, err)
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{
+		"success": true,
+		"message": "",
+	})
+	return
+}
+
+func SendSMSVerification(c *gin.Context) {
+	phone := c.Query("phone")
+	if phone == "" || len(phone) > 20 {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "无效的手机号",
+		})
+		return
+	}
+	if model.IsPhoneAlreadyTaken(phone) {
+		c.JSON(http.StatusOK, gin.H{
+			"success": false,
+			"message": "手机号已被占用",
+		})
+		return
+	}
+	code := common.GenerateVerificationCode(6)
+	common.RegisterVerificationCodeWithKey(phone, code, common.SMSVerificationPurpose)
+	err := common.SendSMS(phone, code)
 	if err != nil {
 		common.ApiError(c, err)
 		return

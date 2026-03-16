@@ -157,7 +157,17 @@ func Register(c *gin.Context) {
 			return
 		}
 	}
-	exist, err := model.CheckUserExistOrDeleted(user.Username, user.Email)
+	if common.SMSVerificationEnabled {
+		if user.Phone == "" || user.VerificationCode == "" {
+			common.ApiErrorI18n(c, i18n.MsgUserSMSVerificationRequired)
+			return
+		}
+		if !common.VerifyCodeWithKey(user.Phone, user.VerificationCode, common.SMSVerificationPurpose) {
+			common.ApiErrorI18n(c, i18n.MsgUserVerificationCodeError)
+			return
+		}
+	}
+	exist, err := model.CheckUserExistOrDeleted(user.Username, user.Email, user.Phone)
 	if err != nil {
 		common.ApiErrorI18n(c, i18n.MsgDatabaseError)
 		common.SysLog(fmt.Sprintf("CheckUserExistOrDeleted error: %v", err))
@@ -178,6 +188,9 @@ func Register(c *gin.Context) {
 	}
 	if common.EmailVerificationEnabled {
 		cleanUser.Email = user.Email
+	}
+	if common.SMSVerificationEnabled {
+		cleanUser.Phone = user.Phone
 	}
 	if err := cleanUser.Insert(inviterId); err != nil {
 		common.ApiError(c, err)
@@ -390,6 +403,7 @@ func GetSelf(c *gin.Context) {
 		"role":              user.Role,
 		"status":            user.Status,
 		"email":             user.Email,
+		"phone":             user.Phone,
 		"github_id":         user.GitHubId,
 		"discord_id":        user.DiscordId,
 		"oidc_id":           user.OidcId,
